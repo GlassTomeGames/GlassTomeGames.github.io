@@ -2,7 +2,7 @@
 layout: post
 title:  "Hello world!"
 date:   2020-08-26 16:08:40 -0400
-categories: update
+tags: update
 ---
 
 We'll be using this space to write about our progress working on Sprawl and Architect.
