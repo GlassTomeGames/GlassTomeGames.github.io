@@ -24,7 +24,7 @@ The whole effect was designed to be efficient. We can use this shader on 100 bui
 
 <img src="{{ site.base.url }}/assets/images/posts/2/ExtremeBend.png" class="wrap-right">
 
-This question is the crux of our bendy buiding shader. In early iterations of this effect I didn't put enough thought into how I wanted the bending to look at extreme angles and this led to some pretty ugly results. The version we use now looks good even with large deformations.
+How can we deform the building while making sure it still looks like a building?a In early iterations of this effect I didn't put enough thought into how I wanted the bending to look at extreme angles and this led to some pretty ugly results. The version we use now looks good even with large deformations.
 
 There are two important design choices I made for this to work. First, the building should deform so that locally its "up" frame of reference matches the curve direction. Second, while the volume of the building changes, the area of each cross section should remain the same.
 
@@ -160,7 +160,7 @@ Properties
 }
 {% endhighlight %}
 
-There's a few custom properties here. `_CurveAmount` will determine the height of $$P_2$$ as a fraction of the height of the mesh. Both `_Angle` and `_CurveDir` will be used to determine $$P_3$$ as described above. This leaves `_MeshData`, which will contain the origin of the mesh (in the `xyz` coordinates0 and the height of the mesh (in the `w` coordinate). We'll fill `_MeshData` manually here, but in Sprawl these values are computed and fed to the shader via a script. _Actually, these properties are part of a [Material Property Block](https://docs.unity3d.com/ScriptReference/MaterialPropertyBlock.html), so that each building instance can be controlled uniquely._
+There's a few custom properties here. `_CurveAmount` will determine the height of $$P_2$$ as a fraction of the height of the mesh. Both `_Angle` and `_CurveDir` will be used to determine $$P_3$$ as described above. This leaves `_MeshData`, which will contain the origin of the mesh (in the `xyz` coordinates) and the height of the mesh (in the `w` coordinate). We'll fill `_MeshData` manually here, but in Sprawl these values are computed and fed to the shader via a script. _Actually, these properties are part of a [Material Property Block](https://docs.unity3d.com/ScriptReference/MaterialPropertyBlock.html), so that each building instance can be controlled uniquely._
 
 Now we'll modify our surface subshader to use a new custom vertex program
 
@@ -373,7 +373,7 @@ This shader isn't a realistic model of elastic deformation, just one that looks 
 
 The elastic pinging effect shown at the top of this post is produced using on of my favourite algorithms --- the heavy ball algorithm.
 
-Heavy ball is an optimization algorithm. Given some function (and its gradients), it searches for the minimizer of that function. The name comes from some intuition for the algorithm --- it's like placing a heavy ball at some point on the functions surface, and letting it roll down towards the lowest point.
+Heavy ball is an optimization algorithm. Given some function (and its gradients), it searches for the minimum of that function. The name comes from some intuition for the algorithm --- it's like placing a heavy ball at some point on the functions surface, and letting it roll down towards the lowest point.
 
 Explaining the full algorithm is out-of-scope for this post, but I'll present the updates the algorithm gives for our use case. We'll begin by creating a new class, which we can query to apply a step of the heavy ball algorithm.
 
@@ -422,7 +422,7 @@ This update will push the parameter towards zero. If the damping coefficient is 
 <summary>Additional notes on heavy ball</summary>
 
 
-The heavy ball algorithm finds the minimizer of a function, f. More generally, the update can be written as follows.
+The heavy ball algorithm finds the minimum of a function, f. More generally, the update can be written as follows.
 
 {% highlight cs %}
 public void Step(float deltaTime)
@@ -488,8 +488,8 @@ At this point, the post is getting pretty long and we've covered the most exciti
 - Until the mouse is released,
     - We raycast to find the position of the mouse on a horizontal plane at the buildings base
     - We set the curve direction shader property to match this position relative to the building
-    - We set the angle as proportional to the mouse distance
-- When mouse button is released, we rely on heavy ball to pull the angle back towards zero
+    - We set the angle to be proportional to the mouse distance
+- When the mouse button is released, we rely on heavy ball to pull the angle back towards zero
 
 ## Usage in Sprawl
 
@@ -498,6 +498,8 @@ At this point, the post is getting pretty long and we've covered the most exciti
 We introduced this shader to Sprawl a couple of weeks ago, and really like how it fits.
 
 We use this heavy-ball spring effect to make moving buildings around feel really fun. As you drag the buildings, they tilt in the direction of the movement. When you release the buildings, they pop into their new position and spring back and forth a little.
+
+Not everything went as planned though.
 
 
 <img src="{{ site.baseurl }}/assets/images/posts/2/Bendy-bug-feature.png" class="centered-full">\
