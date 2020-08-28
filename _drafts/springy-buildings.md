@@ -522,4 +522,5 @@ Not everything went as planned though.
 We had a bug that made all of our buildings slightly bendy when they spawned. We liked how it looked, so now it's a feature.
 
 
+[Sprawl](https://www.glasstomegames.co.uk/home/sprawl) has come a long way since we slapped it together for the [GMTK 2020 jam](https://necrosaint.itch.io/sprawl). We've been hard at work improving the controls, UI, performance, and basically everything else. Keep an eye on this blog for more updates as we edge closer to release and complete [our email form](https://docs.google.com/forms/d/e/1FAIpQLSeTmE4UXzPn823CSO7UJHWUuOar6VDKfM9PGWUsu6wXhxb-3g/viewform) so that we can let you know when the game releases, for free, on mobile soon!
 
