@@ -1,6 +1,7 @@
 ---
 layout: post
 title:  "Elastic buildings and heavy balls"
+date:   2020-08-28 11:05:40 -0400
 author: James Lucas
 tags: tutorial sprawl unity
 ---
