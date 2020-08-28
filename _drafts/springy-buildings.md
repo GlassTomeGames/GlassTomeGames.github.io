@@ -19,7 +19,6 @@ The springy building is essentially achieved in two parts. First, there is a ver
 
 The whole effect was designed to be efficient. We can use this shader on 100 buildings simultaneously on mobile without observing a significant performance hit. Before we spill the beans, **it's time for some maths...**
 
-
 ## Preserving mesh structure
 
 <img src="{{ site.base.url }}/assets/images/posts/2/ExtremeBend.png" class="wrap-right">
@@ -293,7 +292,7 @@ And finally, we'll correct the normals and tangents.
 void vert (inout appdata_full v) {
     // ...
     // Correct normals and tangents
-    v.normal = v.normal = rodr_rot(rotAxis, rotAngle, v.normal);
+    v.normal = rodr_rot(rotAxis, rotAngle, v.normal);
     v.tangent.xyz = rodr_rot(rotAxis, rotAngle, v.tangent.xyz);
 }
 {% endhighlight %}
