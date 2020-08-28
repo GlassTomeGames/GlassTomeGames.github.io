@@ -141,7 +141,9 @@ float3 QuadBezierTangent(float3 a, float3 b, float3 c, float t)
 {% endhighlight %}
 </details>
 
-Now, we'll add the properties that we'll need to our surface shader
+#### Setting up the shader
+
+For this post, we're using Unity 2019.4.8f1. Let's begin by creating a new surface shader in unity. As a first step, we'll add the properties that we'll need to the property block.
 
 {% highlight glsl %}
 Properties
@@ -160,11 +162,11 @@ Properties
 
 There's a few custom properties here. `_CurveAmount` will determine the height of $$P_2$$ as a fraction of the height of the mesh. Both `_Angle` and `_CurveDir` will be used to determine $$P_3$$ as described above. This leaves `_MeshData`, that will contain the origin of the mesh (in the `xyz` coordinates) and the height of the mesh (in the `w` coordinate). We'll fill `_MeshData` manually for now, but in Sprawl these values are computed and fed to the shader via a C# script. _Actually, these properties are part of a [Material Property Block](https://docs.unity3d.com/ScriptReference/MaterialPropertyBlock.html), so that each building instance can be controlled uniquely._
 
-Now we'll modify our surface subshader to use a new custom vertex program
+Now we'll modify our surface shader to use a new custom vertex program.
 
 {% highlight glsl %}
 // Inside the surface shader subprogram
-#pragma surface surf Standard vertex:vert
+#pragma surface surf Standard vertex:vert // <- Note the added vertex directive
 #pragma target 3.0
 
 #include "Bezier.cginc"
@@ -181,7 +183,11 @@ void vert (inout appdata_full v) {
 {% endhighlight %}
 
 
-The first step we'll take is computing $$P_1$$, $$P_2$$, and $$P_3$$. 
+We're now ready to start writing our vertex program.
+
+#### Computing the Bezier curve
+
+The first step we'll take is computing $$P_1$$, $$P_2$$, and $$P_3$$. To do this, we'll need to use the mesh data --- which tells us where the base of the mesh is and its height.
 
 {% highlight glsl %}
 void vert (inout appdata_full v) {
@@ -196,20 +202,22 @@ void vert (inout appdata_full v) {
     // Compute curve data
     float3 curveDir = normalize(_CurveDir.xyz);
     float3 curveTarget = meshBase + meshUp * _CurveAmount; // <- P2
-    float3 curveEnd = CurveEnd(meshBase, curveDir, meshHeight, _Angle * Deg2Rad); // <- P3
+    float3 curveEnd = curve_end(meshBase, curveDir, meshHeight, _Angle * Deg2Rad); // <- P3
 }
 {% endhighlight %}
 
-We used a function here that we haven't defined yet, `CurveEnd`. This function computes $$P_3$$, as follows,
+We used a function here that we haven't defined yet, `curve_end`. This function computes $$P_3$$, as follows,
 
 {% highlight glsl %}
-float3 CurveEnd(float3 base, float3 dir, float height, float angle)
+float3 curve_end(float3 base, float3 dir, float height, float angle)
 {
     return base + height * (sin(angle) * dir + cos(angle) * float3(0,0,1));
 }
 {% endhighlight %}
 
-Now that we have the points of our Bezier curve, we need to compute the updated positions of the vertices.
+#### Updating the vertex position
+
+Now that we have the points of our Bezier curve, we need to compute the updated positions of the vertices. The offset for the vertices is given by evaluating the Bezier curve at the vertex height (normalized).
 
 {% highlight glsl %}
 void vert (inout appdata_full v) {
@@ -232,12 +240,16 @@ void vert (inout appdata_full v) {
 }
 {% endhighlight %}
 
-This code computes the relative offset of the vertices from the Bezier curve, and updates the positions accordingly. But it doesn't quite work, yet.
+This code computes the relative offset of the vertices correctly from the Bezier curve, and updates the positions accordingly. But it doesn't quite work, yet.
 
 <img src="{{ site.baseurl }}/assets/images/posts/2/BuildingBendShear.gif" class="centered">\
 The bending looks decent for small angles, but at larger angles it is clear that the deformation is incorrect. The mesh is shearing, causing an inconsistent structure. And the normals aren't being updated, causing incorrect lighting.
 
 To fix these issues, we need to update the local frame for the vertices, depending on their height.
+
+#### Rotating the local frames
+
+To achieve the desired deformation, we will rotate all vertices at height $$z$$ about the point $$(0,0,z)$$ according to the curve's tangent direction.
 
 {% highlight glsl %}
 void vert (inout appdata_full v) {
@@ -279,15 +291,14 @@ float3 rodr_rot(float3 k, float cosangle, float3 v)
 {% endhighlight %}
 </details>
 
-The rotation code here is quite dense. In the first line we compute the axis of rotation for our local frame. This depends on curve direction and whether we are using a negative or positive angle (hence the `sign(_Angle)` function).
+The rotation code here is quite dense. We first compute `rotAxis`, the axis of rotation for our local frame. This depends on the curve direction and whether we are using a negative or positive angle (hence the `sign(_Angle)` function).
 
 We then compute the cosine of the angle that the tangent makes with the global up axis. This is used to rotate the vertex offset from the mesh center-line to match the local frame from the Bezier curve. Phew!
 
 <img src="{{ site.baseurl }}/assets/images/posts/2/BuildingBendCorrect.gif" class="centered">\
 Our building now deforms correctly!
 
-
-<img src="{{ site.baseurl }}/assets/images/posts/2/BuildingBendNormals.png" class="wrap-right">
+#### Final touches
 
 And finally, we'll correct the normals and tangents.
 
@@ -300,8 +311,11 @@ void vert (inout appdata_full v) {
 }
 {% endhighlight %}
 
+<img src="{{ site.baseurl }}/assets/images/posts/2/BuildingBendNormals.png" class="wrap-right">
 
 Our shader is now complete! We can deform the building, in any direction, and control the amount of deformation via the `_CurveAmount` property. The building retains its structure and the normals and tangents are updated to match the deformation.
+
+<br><br><br>
 
 <details>
 <summary>Full vertex program</summary>
@@ -311,7 +325,7 @@ float _Angle;
 float _CurveAmount;
 float3 _CurveDir;
 
-float3 CurveEnd(float3 base, float3 dir, float height, float angle)
+float3 curve_end(float3 base, float3 dir, float height, float angle)
 {
     return base + height * (sin(angle) * dir + cos(angle) * float3(0,0,1));
 }
@@ -332,7 +346,7 @@ void vert (inout appdata_full v) {
     float3 meshTop = meshBase + meshUp;
     float3 curveDir = normalize(_CurveDir.xyz);
     float3 curveTarget = meshBase + meshUp * _CurveAmount;
-    float3 curveEnd = CurveEnd(meshBase, curveDir, meshHeight, _Angle * Deg2Rad);
+    float3 curveEnd = curve_end(meshBase, curveDir, meshHeight, _Angle * Deg2Rad);
 
     // Compute this vertex position and Bezier tangent
     float height = clamp(v.vertex.z / meshHeight, 0, 1); // Compute relative height of vertex
