@@ -23,14 +23,14 @@ The whole effect was designed to be efficient. We can use this shader on 100 bui
 
 <img src="{{ site.base.url }}/assets/images/posts/2/ExtremeBend.png" class="wrap-right">
 
-How can we deform the building while making sure it still looks like a building?a In early iterations of this effect I didn't put enough thought into how I wanted the bending to look at extreme angles and this led to some pretty ugly results. The version we use now looks good even with large deformations.
+How can we deform the building while making sure it still looks like a building? In the early iterations of this effect, I didn't put enough thought into how I wanted the bending to look at extreme angles and this led to some pretty ugly results. The version we use now looks good even with large deformations.
 
-There are two important design choices I made for this to work. First, the building should deform so that locally its "up" frame of reference matches the curve direction. Second, while the volume of the building changes, the area of each cross section should remain the same.
+There are two important design choices I made for this to work. First, the building should deform so that locally its "up" frame of reference matches the curve direction. Second, while the volume of the building changes, the area of each cross-section should remain the same.
 
 <img src="{{ site.baseurl }}/assets/images/posts/2/WhiteboardBigBrain.jpg" class="centered">\
 Some whiteboarding helped me figure out what I wanted the mesh to do.
 
-- Each horizontal cross section has its area preserved.
+- Each horizontal cross-section has its area preserved.
     - Each vertex finds a point on the curve using only its height
     - We rotate all vertices about the local frame defined by the curve tangent at their height
 - We want the bottom of the mesh to remain fixed and parallel to the floor.
@@ -48,7 +48,7 @@ We'll focus on just one member of the Bezier curve family, the [Quadratic Bezier
 
 $$y = (1 - t)^2 P_1 + 2(1-t)t P_2 + t^2 P_3.$$
 
-We will also want to compute the tangent to the curve later, which can be derived as,
+We will also want to compute the tangent to the curve, that can be derived as,
 
 $$\frac{dy}{dt} = 2 \left[(1 - t)(P_2 - P_1) + t(P_3 - P_2)\right].$$
 
@@ -80,7 +80,7 @@ public static class QuadraticBezier
 
 Note that the tangent is given by linearly interpolating between the vectors $$P_2 - P_1$$ and $$P_3 - P_2$$. So by choosing $$P_2$$ to be directly above $$P_1$$, we can guarantee that the curve tangent points directly up at the base of the building!
 
-We can also reduce bad self intersections by choosing $$P_2$$ to be smaller than the height of the building.
+We can also reduce unwanted self-intersections by choosing $$P_2$$ to be smaller than the height of the building.
 
 ### Local frames along the curve
 
@@ -90,11 +90,12 @@ We can compute the local frame by taking the tangent at point $$t$$, and computi
 
 <details>
 <summary>Code</summary>
-In C#, this can be achieved simply by.
+In C#, the rotation defining the local frame can be computed as a Quaternion.
 {% highlight cs %}
 Vector3 tangent = QuadraticBezier.GetDerivative(P1, P2, P3, t);
 Quaternion rotation = Quaternion.FromToRotation(Vector3.up, tangent);
 {% endhighlight %}
+
 In our shader, we'll use a slightly different approach to achieve the same effect.
 </details>
 
@@ -106,18 +107,16 @@ We've already pointed out that we should place $$P_1$$ at the base of the buildi
 
 <img src="{{ site.baseurl }}/assets/images/posts/2/CurveTarget.gif" class="wrap-left">
 
-The final point in our Bezier curve is determined with a direction and angle for the building curve. We'll place the point on a hemisphere with radius equal to the building height --- the angle will determine how close the building is to the equator of the hemisphere, and the direction will determine which way it points outwards.
+The final point in our Bezier curve is determined with a direction and angle. We'll place $$P_3$$ on a hemisphere with a radius equal to the building height --- the angle will determine how close the building is to the equator of the hemisphere, and the direction will determine which way it points outwards.
 
 
-This approach guarantees that when the angle is zero, the building retains its original form. As the angle increases, the building is deformed more until the top of the building is touching the floor.
-
-Additionally, by choosing $$P_2$$ to be closer to the top of the building, we get a larger arc, and closer to the floor gives a flatter curve.
+This approach guarantees that when the angle is zero, the building retains its original form. As the angle increases, the building is deformed more until the top of the building is touching the floor. Additionally, by choosing $$P_2$$ to be closer to the top of the building, we get a larger arc, and closer to the floor gives a flatter curve.
 
 Finally, we're ready to start writing our shader.
 
 ## Writing the shader
 
-We'll write a surface shader with a custom vertex program that deforms the mesh. Our deformation will work in object space and will make some assumptions about the mesh that we're deforming --- namely, that it's origin is at the base of the mesh and centered.
+We'll write a surface shader with a custom vertex program that deforms the mesh. Our deformation will work in object space and will make some assumptions about the mesh that we're deforming --- namely, that its origin is at the base of the mesh and that we want to bend around the up-axis.
 
 ### Implementation
 
@@ -159,7 +158,7 @@ Properties
 }
 {% endhighlight %}
 
-There's a few custom properties here. `_CurveAmount` will determine the height of $$P_2$$ as a fraction of the height of the mesh. Both `_Angle` and `_CurveDir` will be used to determine $$P_3$$ as described above. This leaves `_MeshData`, which will contain the origin of the mesh (in the `xyz` coordinates) and the height of the mesh (in the `w` coordinate). We'll fill `_MeshData` manually here, but in Sprawl these values are computed and fed to the shader via a script. _Actually, these properties are part of a [Material Property Block](https://docs.unity3d.com/ScriptReference/MaterialPropertyBlock.html), so that each building instance can be controlled uniquely._
+There's a few custom properties here. `_CurveAmount` will determine the height of $$P_2$$ as a fraction of the height of the mesh. Both `_Angle` and `_CurveDir` will be used to determine $$P_3$$ as described above. This leaves `_MeshData`, that will contain the origin of the mesh (in the `xyz` coordinates) and the height of the mesh (in the `w` coordinate). We'll fill `_MeshData` manually for now, but in Sprawl these values are computed and fed to the shader via a C# script. _Actually, these properties are part of a [Material Property Block](https://docs.unity3d.com/ScriptReference/MaterialPropertyBlock.html), so that each building instance can be controlled uniquely._
 
 Now we'll modify our surface subshader to use a new custom vertex program
 
@@ -186,6 +185,8 @@ The first step we'll take is computing $$P_1$$, $$P_2$$, and $$P_3$$.
 
 {% highlight glsl %}
 void vert (inout appdata_full v) {
+    const float Deg2Rad = UNITY_PI / 180.0;
+
     // Get the mesh data
     float3 meshBase = _MeshData.xyz; // <- P1
     float meshHeight = _MeshData.w;
@@ -218,7 +219,7 @@ void vert (inout appdata_full v) {
     // Compute curve data
     // ...
 
-    // Compute this vertex position and Bezier tangent
+    // Compute this vertex position
     float height = clamp(v.vertex.z / meshHeight, 0, 1); // Compute relative height of vertex
     float3 bPoint = QuadBezier(
         meshBase, curveTarget, curveEnd, height
@@ -234,7 +235,7 @@ void vert (inout appdata_full v) {
 This code computes the relative offset of the vertices from the Bezier curve, and updates the positions accordingly. But it doesn't quite work, yet.
 
 <img src="{{ site.baseurl }}/assets/images/posts/2/BuildingBendShear.gif" class="centered">\
-The building bending looks decent for small angles, but at larger angles it is clear that the deformation is incorrect. The mesh is shearing, causing an inconsistent structure. And the normals aren't being updated, causing incorrect lighting.
+The bending looks decent for small angles, but at larger angles it is clear that the deformation is incorrect. The mesh is shearing, causing an inconsistent structure. And the normals aren't being updated, causing incorrect lighting.
 
 To fix these issues, we need to update the local frame for the vertices, depending on their height.
 
@@ -254,7 +255,7 @@ void vert (inout appdata_full v) {
     // Some trigonometry to get the cosine of the rotation angle
     float cosAngle = bTangent.z / length(bTangent);
     // We use Rodrigues' rotation formula
-    float3 rotOffset = rodr_rot(rotAxis, cosAngle, centerxy);
+    float3 rotOffset = rodr_rot(rotAxis, cosAngle, float3(v.vertex.x, v.vertex.y, 0));
 
     // Update the vertex position
     float4 newPos = float4(rotOffset, 0, 1);
@@ -262,7 +263,6 @@ void vert (inout appdata_full v) {
     v.vertex = newPos;     
 }
 {% endhighlight %}
-
 
 <details>
 <summary>Rodrigues' rotation formula</summary>
@@ -279,6 +279,9 @@ float3 rodr_rot(float3 k, float cosangle, float3 v)
 {% endhighlight %}
 </details>
 
+The rotation code here is quite dense. In the first line we compute the axis of rotation for our local frame. This depends on curve direction and whether we are using a negative or positive angle (hence the `sign(_Angle)` function).
+
+We then compute the cosine of the angle that the tangent makes with the global up axis. This is used to rotate the vertex offset from the mesh center-line to match the local frame from the Bezier curve. Phew!
 
 <img src="{{ site.baseurl }}/assets/images/posts/2/BuildingBendCorrect.gif" class="centered">\
 Our building now deforms correctly!
@@ -298,7 +301,7 @@ void vert (inout appdata_full v) {
 {% endhighlight %}
 
 
-Our shader is now complete! We can deform the building, in any direction, and control the amount of deformation via the `_CurveAmount` property. The building retains it's structure and the normals and tangents are updated to match the deformation.
+Our shader is now complete! We can deform the building, in any direction, and control the amount of deformation via the `_CurveAmount` property. The building retains its structure and the normals and tangents are updated to match the deformation.
 
 <details>
 <summary>Full vertex program</summary>
@@ -361,7 +364,7 @@ Before we move on to the spring effect, lets discuss a few caveats with this app
 
 ### Some caveats
 
-One thing that we're missing here is correct shadows. I left this out as this post was already very long, but there's nothing significantly difficult for shadows. We just need to update our shadow vertex program to match the deformed mesh.
+The attentive readers among you might have noticed that, unlike our Sprawl building, our red block has no shadow. If we enabled shadows, we would see that the shadows do no match the deformed mesh. I left this out as this post was already very long, but there's nothing significantly difficult for shadows. We just need to update our shadow vertex program to match the deformed mesh.
 
 This shader isn't a realistic model of elastic deformation, just one that looks good. There are many approaches to getting more realistic deformations --- my favourite for interactive applications is via [Position Based Dynamics](https://matthias-research.github.io/page…). We implemented a simple version of this in Unity not too long ago!
 
@@ -372,9 +375,9 @@ This shader isn't a realistic model of elastic deformation, just one that looks 
 
 The elastic pinging effect shown at the top of this post is produced using on of my favourite algorithms --- the heavy ball algorithm.
 
-Heavy ball is an optimization algorithm. Given some function (and its gradients), it searches for the minimum of that function. The name comes from some intuition for the algorithm --- it's like placing a heavy ball at some point on the functions surface, and letting it roll down towards the lowest point.
+The heavy ball algorithm is used for optimization. Given some function (and its gradients), it searches for the minimum of that function. The name comes from some intuition for the algorithm --- it's like placing a heavy ball at some point on the function's surface, and letting it roll down towards the lowest point.
 
-Explaining the full algorithm is out-of-scope for this post, but I'll present the updates the algorithm gives for our use case. We'll begin by creating a new class, which we can query to apply a step of the heavy ball algorithm.
+Explaining the full algorithm is out-of-scope for this post, but I'll present the updates the algorithm gives for our use case. We'll begin by creating a new class, that we can query to apply a step of the heavy ball algorithm.
 
 {% highlight cs %}
 public class HeavyBall1D
@@ -475,17 +478,17 @@ public class SpringyBall : MonoBehaviour
 {% endhighlight %}
 </details>
 
-The heavy ball algorithm will serve as the foundation for our dynamic springiness. All that's left is to add some interaction, as everything is funner when you're the one doing it.
+The heavy ball algorithm will serve as the foundation for our dynamic springiness. All that's left is to add some interaction, as everything is more fun when you're the one doing it.
 
 ## Adding interaction
 
 <img src="{{ site.baseurl }}/assets/images/posts/2/BuildingSpring.gif" class="centered">
 
-At this point, the post is getting pretty long and we've covered the most exciting parts. So I'll give the broad strokes for the interactive elements here, which is nothing special.
+At this point, the post is getting pretty long and we've covered the most exciting parts. So I'll give the broad strokes for the interactive elements here, which are nothing special.
 
 - First, detect when the building is clicked
 - Until the mouse is released,
-    - We raycast to find the position of the mouse on a horizontal plane at the buildings base
+    - We raycast to find the position of the mouse on a horizontal plane at the building's base
     - We set the curve direction shader property to match this position relative to the building
     - We set the angle to be proportional to the mouse distance
 - When the mouse button is released, we rely on heavy ball to pull the angle back towards zero
