@@ -10,6 +10,8 @@ tags: gamejam unity
 
 Last weekend we participated in [Mini Jam #63](https://itch.io/jam/mini-jam-63-future). Mini Jam is a weekend-long game jam that runs every two weeks and features a fun twist. All games are given a theme and an additional limitation they must adhere to. This time, the theme was "Future" and the limitation was that all games must use only colours in a [fixed colour palette](https://lospec.com/palette-list/arcade-standard-29).
 
+The Long Road is a turn based survival game. The player is traversing across an ever changing, post apocalyptic world and confronted by random text based events. The player must lead his group of survivors and make tough decisions as they fend of bandits, starvation and so much more. 
+
 - 48 hours of development
 - 143 Commits, ~2300 LOC
 - ~1000 words of story content
