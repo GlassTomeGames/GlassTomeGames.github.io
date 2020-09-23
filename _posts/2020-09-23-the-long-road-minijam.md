@@ -2,6 +2,7 @@
 layout: post
 title:  "A short stop on The Long Road"
 author: James Lucas & Rio Kisjantoro
+date:   2020-09-23 19:05:40 -0400
 tags: gamejam unity
 ---
 
@@ -62,7 +63,7 @@ We'll break down the development of the codebase chronologically.
 
 We managed to spend about 12 hours over the weekend working on the code (thank you, Emily!). This was more than we expected and enabled us to complete almost everything on our wish list.
 
-## Hours 0-2 (Saturday)
+## Hours 0-3 (Saturday)
 
 <img src="{{ site.baseurl }}/assets/images/posts/3/Grid-Plane-Movement.gif" class="wrap-left">
 
