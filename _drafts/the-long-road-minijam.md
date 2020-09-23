@@ -20,6 +20,13 @@ Last weekend we participated in [Mini Jam #63](https://itch.io/jam/mini-jam-63-f
 
 We begin each of our game jam's the same way: with a short call to bounce around ideas. TODO: Describe this conversation phase and how the idea came about.
 
+A typical call normally has a few rejected ideas or concepts before we land on a "genre" that we like and then we build on that. Rio suggested some kind of survival game based on a grid that populates as you move around the world. The idea of future led us to create a world that you don't want to settle down in; A world where you have to keep on moving in order to survive. Once we had this core idea, we starting building on it by suggested gameplay loops and mechanisms for the player. 
+
+Turn based gameplay would lend itself well to the grid style that we were already proficient in thanks to Sprawl. From that we figured out we probably need resources. Food came first and naturally after that population or group size came into play. We knew that we wanted to simple and engaging game, so we restricted it to 3 resources and settled on weapons for the last one. This allowed us to introduce conflict and allow the player to deal with it in a few different ways. 
+
+At this point we were trying to find the core essence of the game. What made the player care about the world and their character? After recently picking up "As Far as the eye" we were quite fond of their option system when encountering new tribes. What if we mixed in some old school text based adventure and created a large directory of events that could be randomly chosen from when the player goes to a tile.
+
+CAN GET RID OF THIS BELOW(?)
 - Turn based survival game
 - Grid-based gameplay (our speciality by now)
 - Resources in the game
