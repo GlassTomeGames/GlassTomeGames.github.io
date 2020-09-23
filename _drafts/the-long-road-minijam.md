@@ -20,13 +20,13 @@ The Long Road is a turn-based survival game. The player is traversing across an 
 
 # Designing The Long Road
 
-We begin each of our game jam's the same way: with a short call to bounce around ideas.
+We begin each of our game jams the same way: with a short call to bounce around ideas.
 
-A typical call normally has a few rejected ideas or concepts before we land on a "genre" that we like and then we build on that. Rio suggested some kind of survival game based on a grid that populates as you move around the world. The "Future" theme led us to create a world that you don't want to settle down in; A world where you have to keep on moving in order to survive. Once we had this core idea, we starting building on it by suggested gameplay loops and mechanisms for the player. 
+A typical call normally has a few rejected ideas or concepts before we land on a genre that we like and then we build on that. Rio suggested some kind of survival game based on a grid that populates as you move around the world. The "Future" theme led us to create a world that you don't want to settle down in; a world where you have to keep on moving to survive. Once we had this core idea, we started building on it by suggesting gameplay loops and mechanisms for the player.
 
-Turn-based gameplay would lend itself well to the grid style that we were already proficient in thanks to Sprawl. From that we figured out we probably need resources. Food came first and naturally after that population or group size came into play. We knew that we wanted a simple and engaging game, so we restricted it to 3 resources and settled on weapons for the last one. This allowed us to introduce conflict and allow the player to deal with it in a few different ways. 
+Turn-based gameplay would lend itself well to the grid style that we were already proficient in thanks to Sprawl. From there, we figured out that we probably need resources. Food came first and naturally after that population or group size came into play. We knew that we wanted a simple and engaging game, so we restricted it to 3 resources and settled on weapons for the last one. This allowed us to introduce conflict and allow the player to deal with it in a few different ways. 
 
-At this point, we were trying to find the essence of the game. What made the player care about the world and their character? After recently picking up ["As Far as the eye"](https://store.steampowered.com/app/1119700/As_Far_As_The_Eye/) we were quite fond of their option system when encountering new tribes. What if we mixed in some old school text-based adventure and created a large directory of events that could be randomly chosen from when the player goes to a tile?
+At this point, we were trying to find the essence of the game. What made the player care about the world and their character? After recently picking up ["As Far As The Eye"](https://store.steampowered.com/app/1119700/As_Far_As_The_Eye/) we were quite fond of their option system when encountering new tribes. What if we mixed in some old school text-based adventure and created a large directory of events that could be randomly chosen from when the player goes to a tile?
 
 
 ## Scoping the game
