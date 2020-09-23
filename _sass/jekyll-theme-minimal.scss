@@ -119,6 +119,21 @@ img.centered {
   border-radius: 2px;
 }
 
+div.centered {
+  width: 80%;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+div.wrap-right {
+  float: right;
+  width: 40%;
+  margin: 10px;
+  border: 3px solid #555;
+  border-radius: 2px;
+}
+
 img.centered-full {
   width: 100%;
   display: block;
