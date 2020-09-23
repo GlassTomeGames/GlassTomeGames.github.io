@@ -10,9 +10,9 @@ tags: gamejam unity
 
 Last weekend we participated in [Mini Jam #63](https://itch.io/jam/mini-jam-63-future). Mini Jam is a weekend-long game jam that runs every two weeks and features a fun twist. All games are given a theme and an additional limitation they must adhere to. This time, the theme was "Future" and the limitation was that all games must use only colours in a [fixed colour palette](https://lospec.com/palette-list/arcade-standard-29).
 
-The Long Road is a turn-based survival game. The player is traversing across an ever-changing, post-apocalyptic world and is confronted by random text-based events. The player must lead their group of survivors and make tough decisions as they fend off bandits, starvation and so much more. 
+[Our submission, The Long Road](https://itch.io/jam/mini-jam-63-future/rate/763324), is a turn-based survival game. The player is traversing across an ever-changing, post-apocalyptic world and is confronted by random text-based events. The player must lead their group of survivors and make tough decisions as they fend off bandits, starvation and so much more. 
 
-- 48 hours for development
+- Developed over 48 hours
 - 143 Commits, ~2300 LOC
 - ~1000 words of story content
 - 1 instance of funky beats
@@ -26,12 +26,20 @@ A typical call normally has a few rejected ideas or concepts before we land on a
 
 Turn-based gameplay would lend itself well to the grid style that we were already proficient in thanks to Sprawl. From there, we figured out that we probably need resources. Food came first and naturally after that population or group size came into play. We knew that we wanted a simple and engaging game, so we restricted it to 3 resources and settled on weapons for the last one. This allowed us to introduce conflict and allow the player to deal with it in a few different ways. 
 
+<div class="wrap-right">
+<img src="{{ site.baseurl }}/assets/images/posts/3/AFATE_Encounter.png">
+
+Encounters in As Far As The Eye.
+</div>
+
 At this point, we were trying to find the essence of the game. What made the player care about the world and their character? After recently picking up ["As Far As The Eye"](https://store.steampowered.com/app/1119700/As_Far_As_The_Eye/) we were quite fond of their option system when encountering new tribes. What if we mixed in some old school text-based adventure and created a large directory of events that could be randomly chosen from when the player goes to a tile?
 
 
 ## Scoping the game
 
 Scoping for a game jam is always tricky. We tend to overshoot slightly and reign things in as the days go by --- this time was a little different though as James would be working with a new (noisy) family member in the house. It was hard to tell how much time we would have available, so we tried to think about minimum viable products that we could shoot for from the start.
+
+Our simplest version of the game would have only movement and interactive events, without the complexity and consequences introduced by the resource system. And then we could introduce the resource mechanics one-by-one and spend additional time on improving the UI and core mechanics.
 
 # Obeying the palette limitation
 
@@ -82,11 +90,11 @@ You can also see a placeholder player model here, a small sphere that moves with
 
 By now, James had convinced his wife, Emily, to help work on the writing and she had produced several fun interactive events to be placed in the game. With most of the tile event system in place, it was easy to plug in the interactive events. Hooking up the UI elements for this was also fairly painless and didn't take too long.
 
-The last few touches were focused on improving the visuals and tweaking the RNG to be a bit more balanced. Unfortunately, we didn't have enough time to do this well and the version we submitted is still a little punishing.
+The last few touches were focused on improving the visuals and tweaking the RNG to be a bit more balanced. Unfortunately, we didn't have enough time to do this well and the version we submitted is still quite punishing.
 
 # Debrief
 
-We're happy with how much we achieved in this short amount of time. The most prominent feedback we've received is that the RNG elements needs to be rebalanced. We wholeheartedly agree with that, and expect that this would be an ongoing challenge in development. Nonetheless, the game is a lot of fun to play and [you can play it for free](https://necrosaint.itch.io/the-long-road)!
+We're happy with how much we achieved in this short amount of time. The most prominent feedback we've received is that the RNG elements need to be rebalanced. We wholeheartedly agree with that, and expect that this would be an ongoing challenge in development. Nonetheless, the game is a lot of fun to play. But don't take our word for it, [you can play it for free](https://necrosaint.itch.io/the-long-road)!
 
 <div class="centered">
 <iframe width="560" height="315" src="https://www.youtube.com/embed/W9NBeaDsniY" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
