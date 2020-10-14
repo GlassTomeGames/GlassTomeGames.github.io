@@ -29,7 +29,7 @@ TLR is turn-based, allowing the player to choose one of four directions to move 
 
 For now, forget about the randomness and look at a simplified problem. If scavengers found no resources, this is how long they would last on the long road.
 
-Let $$X_t$$ be our food at the start of turn $$t$$, and $$Y_t$$ be our scavenger count. Each scavenger consumes $$\alpha > 0$$ food, so that $$X_{t+1} = \max(X_{t} - \alpha Y_{t}, 0)$$. Additionally, each excess unit of food that is consumed leads to a scavengers death: $$Y_{t+1} = Y_{t} + \min(0, (X_{t} - \alpha Y_{t}))$$.
+Let $$X_t$$ be our food at the start of turn $$t$$, and $$Y_t$$ be our scavenger count. Each scavenger consumes $$\alpha > 0$$ food, so that $$X_{t+1} = \max(X_{t} - \alpha Y_{t}, 0)$$. Additionally, each excess unit of food that is consumed leads to a scavengers death: $$Y_{t+1} = Y_{t} + \min(0, X_{t} - \alpha Y_{t})$$.
 
 This is already looking pretty complicated, but we can make better sense of this by picking some specific values. If we take $$\alpha = 0.5$$ for example, then in each turn we consume food equal to half of our scavengers. And if we have zero food left, then half of our scavengers die.
 
@@ -55,24 +55,29 @@ Looking at this quantity, we see that adding more scavengers decreases the total
 
 ## Scavengers
 
-Let's make things slightly more interesting. Now our scavengers have learned that to survive they need to find more food, and friends. In each turn, food will increase by $$C > 0,$$ and scavengers will increase by $$K > 0$$. Our new dynamics are given by,
+Let's make things slightly more interesting. Now our scavengers have learned that to survive they need to find more food, and friends. In each turn, scavengers find $$C > 0$$ more food, and $$K > 0$$ new scavengers join the group. Our new dynamics are given by,
 
-$$X_{t+1} = \max(X_{t} - \alpha Y_{t}, 0) + C,$$
+$$X_{t+1} = \max(X_{t} - \alpha Y_{t} + C, 0),$$
 
 and,
 
-$$Y_{t+1} = Y_{t} + \min(0, (X_{t} - \alpha Y_{t})) + K.$$
+$$Y_{t+1} = Y_{t} + \min(0, X_{t} - \alpha Y_{t} + K).$$
 
 
 How many turns can the scavengers last now?
 
-First, notice that if $$C > \alpha Y_t$$ then the scavengers gain food on each turn. But the number of scavengers is always increasing by $$K$$. The food will stabilize when $$\alpha Y_t = C$$, and the scavengers will stabilize when $$\alpha Y_t - X_t = K$$. Solving these together, we get,
+First, notice that if $$C > \alpha Y_t$$ then the scavengers gain food on each turn. But the number of scavengers is always increasing by $$K$$. The food will reach an equilibrium when $$\alpha Y_t = C$$, and the scavengers will stabilize when $$\alpha Y_t - X_t = K$$. Solving these together, we get,
 
 $$X_t = C - K,\:\:\: Y_t = C/\alpha.$$
 
-So long as $\alpha < 1$, each turn some scavengers die and are replaced anew. But sadism aside, this isn't very exciting for the player --- they can never lose! How can we fix this?
+So long as $$\alpha < 1$$, each turn some scavengers die and are replaced anew. But sadism aside, this isn't very exciting for the player --- they can never lose! How can we fix this?
 
 ## Scavengers scavenge, sometimes
+
+Instead of giving a constant amount of food and scavengers to the player, let's make each of them random. With probability $$p < 1$$ the player gains $$C$$ food, with probability $$q < 1 - p$$ the player gains $$K$$ scavengers, and otherwise nothing.
+
+Our dynamics are now [stochastic](https://en.wikipedia.org/wiki/Stochastic), meaning sometimes things go up and sometimes they go down. They also form a [Markov chain](https://en.wikipedia.org/wiki/Markov_chain); the present state tells us everything that we need to know about predicting the future.
+
 
 
 
