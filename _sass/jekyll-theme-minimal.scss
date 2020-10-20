@@ -251,6 +251,14 @@ footer {
   -webkit-font-smoothing:subpixel-antialiased;
 }
 
+footer ul {
+  list-style-type:none;
+}
+
+footer ul li {
+  padding: 3px;
+}
+
 @media print, screen and (max-width: 960px) {
 
   div.wrapper {
