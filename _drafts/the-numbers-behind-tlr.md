@@ -95,7 +95,7 @@ Our dynamics are now [stochastic](https://en.wikipedia.org/wiki/Stochastic), mea
 <img src="{{ site.baseurl }}/assets/images/posts/4/stoch_scavenger_sim.gif" class="centered">\
 This leads to much more interesting dynamics.
 
-The stochastic dynamics are significantly more complicated than the deterministic cases before. We now care about a random variable: the stopping time of the process --- when the number of scavengers goes below 1. We need to reason about this random variable in terms of its distribution or moments (e.g. expected value). I'd love to say more about this, but I haven't figured it out yet... Let me know if you have any ideas or a reference that might help!
+The stochastic dynamics are significantly more complicated than the deterministic cases before. We now care about a random variable: the stopping time of the process (when the number of scavengers goes below 1). We need to reason about this random variable in terms of its distribution or moments, e.g. the expected value. I'd love to say more about this, but I haven't figured it out yet... Let me know if you have any ideas or a reference that might help!
 
 Regardless, being able to simulate these systems lets us estimate the stopping time and figure out how tweaking parameters under the hood of our game will affect the average run time and variance within. This is powerful when it comes to balancing --- we can instantly simulate a simplified run of the game and get an idea of how long things should last.
 
@@ -115,10 +115,10 @@ Conflicts are an additional layer of complexity in TLR's dynamics, and also prov
 
 <img src="{{ site.baseurl }}/assets/images/posts/4/biomes.png" class="wrap-right">
 
-In addition to our three resources, TLR has three different biomes to explore. Each has its own set of rules governing how the player's resources change. Forests provide the player with more food but fewer weapons. The wastelands provide very few resources but are generally low-risk. And the cities provide high resources, but have a high chance of dangerous conflicts.
+In addition to our three resources, TLR has three different biomes to explore. Each has its own set of rules governing how the player's resources change. Forests provide the player with more food but fewer weapons. The wastelands provide very few resources but are generally low-risk. And the cities provide plentiful resources, but have a high chance of dangerous conflicts.
 
-Balancing around the biomes is also tricky. We want to encourage the player to move strategically between biomes. One way in which we do this is by restricting conflicts to occur only in specific biomes, meaning the player will need to explore to uncover more of the story. Additionally, explored tiles don't give any new resources/conflicts so that the player must keep moving. But we will need to think hard about how the different dynamics in each biome can be combined to give well-balanced meaningful gameplay.
+Balancing around the biomes is also tricky. We want to encourage the player to move strategically between biomes. One way in which we do this is by restricting conflicts to occur only in specific biomes, meaning the player will need to explore to uncover more of the story. Additionally, explored tiles don't give any new resources/conflicts so that the player must keep moving. We are thinking hard about how the different dynamics in each biome can be combined to give well-balanced, meaningful gameplay.
 
 # Conclusion
 
-This post only really scratches the surface on balancing TLR. We showed, quantitatively, that randomness is needed to make the game interesting. Without it, the survival dynamics become predictable and unexciting. However, we will need to revisit these ideas and build out more complex models to make meaningful balance decisions.
+This post only scratches the surface on balancing TLR. We showed, quantitatively, that randomness is needed to make the game interesting. Without it, the survival dynamics become predictable and unexciting. However, we will need to revisit these ideas and build out more complex models to make meaningful balance decisions.
