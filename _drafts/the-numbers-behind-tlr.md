@@ -1,6 +1,7 @@
 ---
 layout: post
 title:  "Game balance with dynamical systems analysis"
+subtitle: "Part I"
 author: James Lucas
 tags: unity gamedesign
 ---
@@ -95,7 +96,7 @@ Our dynamics are now [stochastic](https://en.wikipedia.org/wiki/Stochastic), mea
 <img src="{{ site.baseurl }}/assets/images/posts/4/stoch_scavenger_sim.gif" class="centered">\
 This leads to much more interesting dynamics.
 
-The stochastic dynamics are significantly more complicated than the deterministic cases before. We now care about a random variable: the stopping time of the process (when the number of scavengers goes below 1). We need to reason about this random variable in terms of its distribution or moments, e.g. the expected value. I'd love to say more about this, but I haven't figured it out yet... Let me know if you have any ideas or a reference that might help!
+The stochastic dynamics are significantly more complicated than the deterministic cases before. We now care about a random variable: the stopping time of the process (when the number of scavengers goes below 1). We need to reason about this random variable in terms of its distribution or moments, e.g. the expected value. **I'd love to say more about this, but I haven't figured it out yet... Let me know if you have any ideas or a reference that might help!**
 
 Regardless, being able to simulate these systems lets us estimate the stopping time and figure out how tweaking parameters under the hood of our game will affect the average run time and variance within. This is powerful when it comes to balancing --- we can instantly simulate a simplified run of the game and get an idea of how long things should last.
 
