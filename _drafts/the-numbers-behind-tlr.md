@@ -15,7 +15,7 @@ The Long Road (TLR) blends elements of roguelike games and classic text-adventur
 
 # A balancing act
 
-There is a tension in TLR. [A cursed problem](https://www.youtube.com/watch?v=8uE6-vIi1rQ) arising due to conflicting promises that we make players. We want players to make meaningful decisions, think strategically, and try to survive as long as possible. However, enabling the player to survive forever through skill alone renders the game boring. One popular way to solve this problem, is by injecting some randomness. Now players are a dice-roll away from thriving (or failing).
+There is tension in TLR. [A cursed problem](https://www.youtube.com/watch?v=8uE6-vIi1rQ) arising due to conflicting promises that we make players. We want players to make meaningful decisions, think strategically, and try to survive as long as possible. However, enabling the player to survive forever through skill alone renders the game boring. One popular way to solve this problem, is by injecting some randomness. Now players are a dice-roll away from thriving (or failing).
 
 But how do we maintain this knife-edge? Give the player too much and their dice rolls become meaningless. Be too harsh and every run feels horribly unfair. To better understand how to successfully design TLR, we will need to dig into the numbers.
 
@@ -23,13 +23,13 @@ But how do we maintain this knife-edge? Give the player too much and their dice 
 
 <img src="{{ site.baseurl }}/assets/images/posts/3/LongRoadJumpHD.gif" class="wrap-right">
 
-There are three resources in The Long Road: food, weapons, and scavengers. Scavengers eat your food to survive: more scavengers need more food and without it they die. Weapons enable combat options in conflicts --- outcomes are better with them than without... The game ends only when you run out of scavengers.
+There are three resources in The Long Road: food, weapons, and scavengers. Scavengers eat your food to survive: more scavengers need more food and without it, they die. Weapons enable combat options in conflicts --- outcomes are better with them than without... The game ends only when you run out of scavengers.
 
-TLR is turn-based, allowing the player to choose one of four directions to move in during each turn. Each new tile you explore may give you either some resources, a conflict, or nothing at all. At the end of the turn, your scavengers consume some of your food (or starve and die). The Long Road includes a healthy serving of randomness, but we want to know how long the player should _expect_ a game to last. Lets start out with some simple first steps.
+TLR is turn-based, allowing the player to choose one of four directions to move in during each turn. Each new tile you explore may give you either some resources, a conflict, or nothing at all. At the end of the turn, your scavengers consume some of your food (or starve and die). The Long Road includes a healthy serving of randomness, but we want to know how long the player should _expect_ a game to last. Let's start with some simple first steps.
 
 ## Wanderers, not yet scavengers
 
-For now, forget about the randomness and look at a simplified problem. If scavengers found no resources, how long they would last on the long road?
+For now, forget about the randomness and look at a simplified problem. If scavengers found no resources, how long would they last on the long road?
 
 Let $$X_t$$ be our food at the start of turn $$t$$, and $$Y_t$$ be our scavenger count. Each scavenger consumes $$\alpha > 0$$ food per turn. Remember, the game runs out when the last scavenger dies ($$Y_t < 1$$). In this simplified version of TLR, the food changes each turn using the following rule,
 
@@ -101,11 +101,11 @@ Regardless, being able to simulate these systems lets us estimate the stopping t
 
 # What is left?
 
-In this post, we explored only a heavily simplified version of the game. However, the dynamics that we explored are very close to the ones we actually utilize in TLR. [There are a few differences and maybe I'll explore these in a future post...] On the other hand, we completely ignored several core components that make up our game.
+In this post, we explored only a simplified version of the game. However, the dynamics that we explored are close to the ones we utilize in TLR. [There are a few differences and maybe I'll explore these in a future post...] On the other hand, we completely ignored several important components that make up our game.
 
 ## Conflicts
 
-Instead of gaining a random amount of resources, players might find themselves faced with a conflict in which they must decide what to do. The outcome from their choice is random, and can range from wonderful to catastrophic. Weapons become useful during conflicts, where they unlock additional choices for the player that are more likely to have favourable outcomes.
+Instead of gaining a random amount of resources, players might find themselves faced with a conflict in which they must decide what to do. The outcome from their choice is random, and can range from wonderful to catastrophic. Weapons become useful during conflicts, where they unlock additional choices that are more likely to have favourable outcomes.
 
 <img src="{{ site.baseurl }}/assets/images/posts/4/TLR_Cultist_Conflict.png" class="centered">
 
@@ -115,9 +115,9 @@ Conflicts are an additional layer of complexity in TLR's dynamics, and also prov
 
 <img src="{{ site.baseurl }}/assets/images/posts/4/biomes.png" class="wrap-right">
 
-In addition to our three resources, TLR has three different biomes to explore. Each has their own set of rules governing how the player's resources change. Forests provide the player with more food but fewer weapons. The wastelands provide very few resources but are generally low-risk. And the cities provide high resources, but have a high chance of dangerous conflicts.
+In addition to our three resources, TLR has three different biomes to explore. Each has its own set of rules governing how the player's resources change. Forests provide the player with more food but fewer weapons. The wastelands provide very few resources but are generally low-risk. And the cities provide high resources, but have a high chance of dangerous conflicts.
 
-Balancing around the biomes is also tricky. We want to encourage the player to move strategically between biomes. One way in which we do this is by restricting conflicts to occur only in specific biomes, meaning the player will need to explore to uncover more of the story. Additionally, explored tiles don't give any new resources/conflicts so that the player must keep moving. But we will need to think hard about how the different dynamics in each biome can be combined together to give well-balanced meaningful gameplay.
+Balancing around the biomes is also tricky. We want to encourage the player to move strategically between biomes. One way in which we do this is by restricting conflicts to occur only in specific biomes, meaning the player will need to explore to uncover more of the story. Additionally, explored tiles don't give any new resources/conflicts so that the player must keep moving. But we will need to think hard about how the different dynamics in each biome can be combined to give well-balanced meaningful gameplay.
 
 # Conclusion
 
