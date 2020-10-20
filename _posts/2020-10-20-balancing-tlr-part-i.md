@@ -1,8 +1,9 @@
 ---
 layout: post
-title:  "Game balance with dynamical systems analysis"
+title:  "Game balance via dynamical systems analysis"
 subtitle: "Part I"
 author: James Lucas
+date:   2020-10-20 07:00:00 -0400
 tags: unity gamedesign
 ---
 
