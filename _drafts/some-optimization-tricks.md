@@ -5,7 +5,7 @@ author: James Lucas
 tags: tutorial unity
 ---
 
-I love micro-optimizing my code with maths. This is rarely necessary, but I dislike unnecessary computation. Adopting these optimization tricks wont double your FPS, but you can sleep happily knowing that you avoided a square root.
+I love micro-optimizing my code with maths. This is rarely necessary, but I dislike unnecessary computation. Adopting these optimization tricks won't double your FPS, but you can sleep happily knowing that you avoided a square root.
 
 <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
 <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -82,7 +82,7 @@ public int FindClosest(Vector3 p, Vector3[] targets)
 }
 {% endhighlight %}
 
-## Field-of-view checking
+## Efficient angle checking
 
 Now we'll make the previous example a little more interesting. We have an enemy that uses sight to detect the player. They have a sight-range, and a maximum angle that they can see in front of them.
 
@@ -137,9 +137,9 @@ public static float Angle(Vector3 from, Vector3 to)
 }
 {% endhighlight %}
 
-There are some red flags here. First, a square root in the first line and then the return value uses an arcosine. That wont do.
+There are some red flags here. First, a square root in the first line and then the return value uses an arcosine. That won't do.
 
-### More efficient field-of-view checking
+### More efficient angle checking
 
 The dot product can equivalently be written,
 
@@ -179,10 +179,31 @@ public bool CheckFoV(Vector3 pos, Vector3 facingDir, Vector3 playerPos, float ma
 
 Note that this function takes in the maximum cosine of the angle squared, instead of the angle itself. This is so that we don't need to compute this within the function each time.
 
+### Signed angle comparisons
 
-## Screen Rotation
+The above code compares unsigned angles only (due to the dot product). We could also use the cross product,
 
-We use a similar trick to the above for our screen rotation implementation in Sprawl.
+$$\mathbf{a} \times \mathbf{b} = ||\mathbf{a}|| \: ||\mathbf{b}|| \sin(\theta) \mathbf{n},$$
+
+where $$n$$ is the normal to the plane defined by the vectors $$a$$ and $$b$$ (according to the right-hand rule). To do a signed angle comparison we need to define an axis, by the unity vector $$\bar{\mathbf{u}}$$ (for our FoV check, `Vector.up` probably makes sense). We can then take the sign of $$\bar{\mathbf{u}} \cdot (\mathbf{a} \times \mathbf{b})$$ to determine the angle sign.
+
+We adopt this approach in Sprawl to handle rotation on mobile via a 2-finger-circle-rotate movement.
+
+## More efficient rotations
+
+<img src="{{ site.baseurl }}/assets/images/posts/2/BuildingSpring.gif" class="wrap-right">
+
+Now suppose I have a `Vector3` that I want to rotate about some axis by an angle of $$\theta$$. There is a (magical) efficient way to do this! [On its surface, this doesn't look so magical. But it is.]
+
+I've mostly used this one when writing shaders --- within my Unity C# scripts I use `Quaternion`s which have an efficient `Vector3` rotation implementation.
+
+### Rodrigues' rotation formula
+
+I have a vector $$\mathbf{v}$$ that I want to rotate about the axis given by the unit vector $$\bar{\mathbf{u}}$$ by an angle of $$\theta$$. The rotated vector can be computed by,
+
+$$\mathbf{v}' = \mathbf{v} \cos(\theta) + (\bar{\mathbf{u}} \times \mathbf{v}) \sin(\theta) + \bar{\mathbf{u}}(\bar{\mathbf{u}} \cdot \mathbf{v}) (1 - \cos(\theta)).$$
+
+We used this formula as part of our [bendy-building shader]({% post_url 2020-08-28-springy-buildings %}), shown above.
 
 # Why?
 
