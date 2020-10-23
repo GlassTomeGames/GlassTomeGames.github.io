@@ -2,6 +2,7 @@
 layout: post
 title:  "A few math-based micro-optimization tricks"
 author: James Lucas
+date:   2020-10-22 22:00:00 -0400
 tags: tutorial unity
 ---
 
