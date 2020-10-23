@@ -1,16 +1,17 @@
 ---
 layout: post
-title:  "A couple math-based micro-optimization tricks"
+title:  "A few math-based micro-optimization tricks"
 author: James Lucas
 tags: tutorial unity
 ---
 
-I love micro-optimizing my code with maths. This is rarely necessary, but I dislike unnecessary computation. Adopting these optimization tricks won't double your FPS, but you can sleep happily knowing that you avoided a square root.
+<img src="{{ site.baseurl }}/assets/images/posts/5/FOV_Check.gif" class="centered">\
+I love micro-optimizing my code. This is rarely necessary, but I dislike unnecessary computation. Adopting these optimization tricks won't double your FPS, but you can sleep happily knowing that you avoided a square root.
 
 <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
 <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
-All of the code below is written in c#, and uses `UnityEngine`'s data types throughout. But the same ideas can easily be applied elsewhere.
+All of the code below is written in C#, and uses `UnityEngine`'s data types throughout. But the same ideas can easily be applied elsewhere.
 
 ## Distance comparisons
 
@@ -84,7 +85,11 @@ public int FindClosest(Vector3 p, Vector3[] targets)
 
 ## Efficient angle checking
 
+<img src="{{ site.baseurl }}/assets/images/posts/5/FOV_Check.gif" class="wrap-left">
+
 Now we'll make the previous example a little more interesting. We have an enemy that uses sight to detect the player. They have a sight-range, and a maximum angle that they can see in front of them.
+
+We'll implement a function that does this field-of-view test, and lets the enemy know whether they can see the player. Our final function wont take any square roots, or directly compute any angles.
 
 ### A first attempt
 
@@ -137,7 +142,7 @@ public static float Angle(Vector3 from, Vector3 to)
 }
 {% endhighlight %}
 
-There are some red flags here. First, a square root in the first line and then the return value uses an arcosine. That won't do.
+There are some red flags here. First, a square root in the first line and then the return value uses an arcos function. That won't do.
 
 ### More efficient angle checking
 
@@ -166,9 +171,9 @@ public bool CheckFoV(Vector3 pos, Vector3 facingDir, Vector3 playerPos, float ma
         return false;
     }
 
-    float posSqMagnitude = pos.sqrMagnitude;
-    float playerPosSqMagnitude = playerPos.sqrMagnitude;
-    float cosSqTheta = angleCheckDot * angleCheckDot / (posSqMagnitude * playerPosSqMagnitude);
+    float forwardSqMagnitude = transform.forward.sqrMagnitude;
+    float diffSqMagnitude = diff.sqrMagnitude;
+    float cosSqTheta = angleCheckDot * angleCheckDot / (forwardSqMagnitude * diffSqMagnitude);
     if (cosSqTheta < maxCosSqAngle) {
         // Outside of viewing range
         return false;
@@ -179,13 +184,163 @@ public bool CheckFoV(Vector3 pos, Vector3 facingDir, Vector3 playerPos, float ma
 
 Note that this function takes in the maximum cosine of the angle squared, instead of the angle itself. This is so that we don't need to compute this within the function each time.
 
+<details>
+<summary>Full source code</summary>
+{% highlight cs %}
+using UnityEngine;
+
+
+#if UNITY_EDITOR
+using UnityEditor;
+[CustomEditor( typeof( FOV ) )]
+public class FOVEditor : Editor
+{
+    void OnSceneGUI()
+    {
+        FOV t = target as FOV;
+        // Set color to indicate view state
+        Handles.color = t.CheckTarget() ? Color.green : Color.magenta;
+        // Draw the fov
+        float angleRadians = Mathf.PI * t.MaxAngle / 180;
+        Vector3 arcStartPoint = t.transform.position + t.MaxDist * (Mathf.Cos(angleRadians) * t.transform.forward + t.transform.right * Mathf.Sin(angleRadians));
+        Vector3 arcEndPoint = t.transform.position + t.MaxDist * (Mathf.Cos(angleRadians) * t.transform.forward - t.transform.right * Mathf.Sin(angleRadians));
+        Handles.DrawWireArc(t.transform.position, -t.transform.up, arcStartPoint - t.transform.position, 2*t.MaxAngle, t.MaxDist);
+        Handles.DrawLine(t.transform.position, t.transform.position + t.MaxDist * t.transform.forward);
+        Handles.DrawLine(t.transform.position, arcStartPoint);
+        Handles.DrawLine(t.transform.position, arcEndPoint);
+
+        float size = 10f;
+        EditorGUI.BeginChangeCheck();
+        float length = Handles.ScaleSlider(t.MaxDist, t.transform.position, t.transform.forward, Quaternion.LookRotation(t.transform.forward), size, 0.1f);
+        if (EditorGUI.EndChangeCheck())
+        {
+            if (length > 0)
+            {
+                t.MaxDist = length;
+            }
+        }
+    }
+}
+#endif
+
+public enum CheckType {
+    Slow,
+    Fast
+}
+
+[ExecuteInEditMode]
+public class FOV: MonoBehaviour
+{
+    [SerializeField]
+    float maxDist = 1;
+
+    [SerializeField]
+    [Range(0, 90f)]
+    float maxAngle = 45;
+
+    [SerializeField]
+    CheckType checkType = CheckType.Slow;
+
+    [SerializeField]
+    Transform target = null;
+
+    float maxSqDist;
+    float cosSqAngle;
+
+    public float MaxDist { get => maxDist; set => maxDist = value; }
+    public float MaxAngle { get => maxAngle; set => maxAngle = value; }
+
+    void OnEnable()
+    {
+        maxSqDist = maxDist * maxDist;
+
+        cosSqAngle = Mathf.Cos(Mathf.Deg2Rad * maxAngle);
+        cosSqAngle *= cosSqAngle;
+    }
+
+    void Update()
+    {
+        if (target != null) {
+            CheckTarget();
+        }
+    }
+
+    public bool CheckTarget()
+    {
+        if (target == null) { return false; }
+        switch (checkType) {
+            case CheckType.Slow:
+                if (CheckFoVSlow(target.position)) {
+                    Debug.Log("In FoV (slow)");
+                    return true;
+                }
+                break;
+            case CheckType.Fast:
+                if (CheckFoV(target.position)) {
+                    Debug.Log("In FoV (fast)");
+                    return true;
+                }
+                break;
+            default:
+                break;
+        }
+        return false;
+    }
+
+    public bool CheckFoVSlow(Vector3 playerPos)
+    {
+        Vector3 diff = playerPos - transform.position;
+        if (Vector3.Dot(diff, diff) > maxSqDist) {
+            // Out of sight range
+            return false;
+        }
+
+        if (Vector3.Dot(transform.forward, diff) < 0) {
+            // Target is behind us
+            return false;
+        }
+
+        if (Vector3.Angle(transform.forward, diff) > maxAngle) {
+            // Outside of viewing range
+            return false;
+        }
+        return true;
+    }
+    public bool CheckFoV(Vector3 playerPos)
+    {
+        Vector3 diff = playerPos - transform.position;
+        if (Vector3.Dot(diff, diff) > maxSqDist) {
+            // Out of sight range
+            return false;
+        }
+
+        float angleCheckDot = Vector3.Dot(transform.forward, diff);
+        if (angleCheckDot < 0) {
+            // Target is behind us
+            return false;
+        }
+
+        float forwardSqMagnitude = transform.forward.sqrMagnitude;
+        float diffSqMagnitude = diff.sqrMagnitude;
+        float cosSqTheta = angleCheckDot * angleCheckDot / (forwardSqMagnitude * diffSqMagnitude);
+        if (cosSqTheta < cosSqAngle) {
+            // Outside of viewing range
+            return false;
+        }
+        return true;
+    }
+}
+{% endhighlight %}
+</details>
+
 ### Signed angle comparisons
 
 The above code compares unsigned angles only (due to the dot product). We could also use the cross product,
 
 $$\mathbf{a} \times \mathbf{b} = ||\mathbf{a}|| \: ||\mathbf{b}|| \sin(\theta) \mathbf{n},$$
 
-where $$n$$ is the normal to the plane defined by the vectors $$a$$ and $$b$$ (according to the right-hand rule). To do a signed angle comparison we need to define an axis, by the unity vector $$\bar{\mathbf{u}}$$ (for our FoV check, `Vector.up` probably makes sense). We can then take the sign of $$\bar{\mathbf{u}} \cdot (\mathbf{a} \times \mathbf{b})$$ to determine the angle sign.
+
+where $$\mathbf{n}$$ is the normal to the plane defined by the vectors $$\mathbf{a}$$ and $$\mathbf{b}$$ (according to the right-hand rule). To do a signed angle comparison we need to define an axis, by the unit vector $$\bar{\mathbf{u}}$$ (for our FoV check, `Vector.up` probably makes sense). We can then take the sign of $$\bar{\mathbf{u}} \cdot (\mathbf{a} \times \mathbf{b})$$ to determine the angle sign.
 
 We adopt this approach in Sprawl to handle rotation on mobile via a 2-finger-circle-rotate movement.
 
@@ -193,7 +348,7 @@ We adopt this approach in Sprawl to handle rotation on mobile via a 2-finger-cir
 
 <img src="{{ site.baseurl }}/assets/images/posts/2/BuildingSpring.gif" class="wrap-right">
 
-Now suppose I have a `Vector3` that I want to rotate about some axis by an angle of $$\theta$$. There is a (magical) efficient way to do this! [On its surface, this doesn't look so magical. But it is.]
+Now suppose I have a `Vector3` that I want to rotate about some axis by an angle of $$\theta$$. There is an efficient, magical way to do this! [On its surface, this doesn't look so magical. But it is.]
 
 I've mostly used this one when writing shaders --- within my Unity C# scripts I use `Quaternion`s which have an efficient `Vector3` rotation implementation.
 
@@ -207,6 +362,6 @@ We used this formula as part of our [bendy-building shader]({% post_url 2020-08-
 
 # Why?
 
-Ultimately, the tricks above are unlikely to make a significant difference to your runtime performance. Choosing good data structures, good algorithms, and optimizing cache efficiency are going to be more important for your game's performance.
+Ultimately, the tricks above are unlikely to make a significant difference to your runtime performance. Choosing good data structures, good algorithms, and optimizing cache efficiency are going to be more important.
 
 But if these computations are appearing frequently in your game --- maybe you need to poll a hundred enemies' FoV per frame --- then these tricks could make a big difference. For me though, knowing that I _can_ do something better is more than enough justification to do it. The question then is, why not?
